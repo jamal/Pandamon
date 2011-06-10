@@ -1,0 +1,3 @@
+"""
+Pandamon package
+"""

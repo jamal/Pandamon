@@ -1,0 +1,39 @@
+README for gst-test
+-------------------
+
+Prototype to get a server and client running for Ninja Octopus 
+(http://launchpad.net/pandamon). 
+
+Running
+-------
+
+First, the server needs to be started using twistd:
+
+    twistd -ny server.tac
+
+Then the client can be started:
+
+    python test-client.py
+
+Once everything is running, you should be able to pull the stream by browsing
+to http://localhost:8801/a.ogg. The path is defined by the first command the 
+client sends. Currently it just sends "stream stream_name". This is just
+a simple protocol defined for the prototype. In the future, we need to 
+address what protocol should be used or created. Currently, I'm leaning towards
+using HTTP as the default protocol. Further on, the server should be able to 
+interpret multiple prtocols such as RTMP to add support for Flash.
+
+Testing with a Webcam and Mic
+-----------------------------
+
+To test with a webcam and mic is quite simple. In test-client.py just change the
+pipeline template. Instead of audiotestsrc, use alsasrc (osssrc, and pulsesrc are
+possible inputs as well), and instead of videotestsrc use v4l2src. As long as you
+can pull up your camera with luvcview or Cheese it should work with this!
+
+
+Pipeline examples
+-----------------
+
+Read ogg file, and simulate the server's pipeline to make an FLV:
+    gst-launch filesrc location=test.ogg ! queue ! decodebin name=decoder ! videorate ! ffmpegcolorspace ! videoscale ! video/x-raw-yuv,width=320,height=240 ! tee name=video ! queue ! autovideosink decoder. ! audioconvert ! tee name=audio ! queue ! autoaudiosink video. ! queue ! ffenc_flv ! flvmux name=mux ! filesink location=output.flv audio. ! queue ! lamemp3enc ! mux.
